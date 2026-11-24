@@ -26,6 +26,20 @@ class FileSelectorMacOS extends FileSelectorPlatform {
     String? initialDirectory,
     String? confirmButtonText,
   }) async {
+    return openFileWithOptions(
+      acceptedTypeGroups: acceptedTypeGroups,
+      options: FileDialogOptions(
+        initialDirectory: initialDirectory,
+        confirmButtonText: confirmButtonText,
+      ),
+    );
+  }
+
+  @override
+  Future<XFile?> openFileWithOptions({
+    List<XTypeGroup>? acceptedTypeGroups,
+    FileDialogOptions options = const FileDialogOptions(),
+  }) async {
     final List<String?> paths = await _hostApi.displayOpenPanel(
       OpenPanelOptions(
         allowsMultipleSelection: false,
@@ -33,8 +47,10 @@ class FileSelectorMacOS extends FileSelectorPlatform {
         canChooseFiles: true,
         baseOptions: SavePanelOptions(
           allowedFileTypes: _allowedTypesFromTypeGroups(acceptedTypeGroups),
-          directoryPath: initialDirectory,
-          prompt: confirmButtonText,
+          directoryPath: options.initialDirectory,
+          prompt: options.confirmButtonText,
+          canCreateDirectories: options.canCreateDirectories,
+          viewId: options.viewId,
         ),
       ),
     );
@@ -47,6 +63,20 @@ class FileSelectorMacOS extends FileSelectorPlatform {
     String? initialDirectory,
     String? confirmButtonText,
   }) async {
+    return openFilesWithOptions(
+      acceptedTypeGroups: acceptedTypeGroups,
+      options: FileDialogOptions(
+        initialDirectory: initialDirectory,
+        confirmButtonText: confirmButtonText,
+      ),
+    );
+  }
+
+  @override
+  Future<List<XFile>> openFilesWithOptions({
+    List<XTypeGroup>? acceptedTypeGroups,
+    FileDialogOptions options = const FileDialogOptions(),
+  }) async {
     final List<String?> paths = await _hostApi.displayOpenPanel(
       OpenPanelOptions(
         allowsMultipleSelection: true,
@@ -54,8 +84,10 @@ class FileSelectorMacOS extends FileSelectorPlatform {
         canChooseFiles: true,
         baseOptions: SavePanelOptions(
           allowedFileTypes: _allowedTypesFromTypeGroups(acceptedTypeGroups),
-          directoryPath: initialDirectory,
-          prompt: confirmButtonText,
+          directoryPath: options.initialDirectory,
+          prompt: options.confirmButtonText,
+          canCreateDirectories: options.canCreateDirectories,
+          viewId: options.viewId,
         ),
       ),
     );
@@ -92,6 +124,7 @@ class FileSelectorMacOS extends FileSelectorPlatform {
         nameFieldStringValue: options.suggestedName,
         prompt: options.confirmButtonText,
         canCreateDirectories: options.canCreateDirectories,
+        viewId: options.viewId,
       ),
     );
     return path == null ? null : FileSaveLocation(path);
@@ -115,6 +148,7 @@ class FileSelectorMacOS extends FileSelectorPlatform {
           directoryPath: options.initialDirectory,
           prompt: options.confirmButtonText,
           canCreateDirectories: options.canCreateDirectories,
+          viewId: options.viewId,
         ),
       ),
     );
@@ -142,6 +176,7 @@ class FileSelectorMacOS extends FileSelectorPlatform {
           directoryPath: options.initialDirectory,
           prompt: options.confirmButtonText,
           canCreateDirectories: options.canCreateDirectories,
+          viewId: options.viewId,
         ),
       ),
     );

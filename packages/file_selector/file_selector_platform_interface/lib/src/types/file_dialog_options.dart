@@ -12,6 +12,7 @@ class FileDialogOptions {
     this.initialDirectory,
     this.confirmButtonText,
     this.canCreateDirectories,
+    this.viewId,
   });
 
   /// The initial directory the dialog should open with.
@@ -26,6 +27,12 @@ class FileDialogOptions {
   ///
   /// May not be supported on all platforms.
   final bool? canCreateDirectories;
+
+  /// The ID of the view to associate the dialog with.
+  ///
+  /// When provided on platforms that support multi-window dialogs, the dialog
+  /// is presented relative to the window containing this view.
+  final int? viewId;
 }
 
 /// Configuration options for a save dialog.
@@ -36,6 +43,7 @@ class SaveDialogOptions extends FileDialogOptions {
     super.initialDirectory,
     super.confirmButtonText,
     super.canCreateDirectories,
+    super.viewId,
     this.suggestedName,
   });
 

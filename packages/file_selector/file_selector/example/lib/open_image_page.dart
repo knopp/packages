@@ -20,7 +20,10 @@ class OpenImagePage extends StatelessWidget {
       extensions: <String>['jpg', 'png'],
       uniformTypeIdentifiers: <String>['public.jpeg', 'public.png'],
     );
-    final XFile? file = await openFile(acceptedTypeGroups: <XTypeGroup>[typeGroup]);
+    final XFile? file = await openFile(
+      acceptedTypeGroups: <XTypeGroup>[typeGroup],
+      context: context,
+    );
     // #enddocregion SingleOpen
     if (file == null) {
       // Operation was canceled by the user.

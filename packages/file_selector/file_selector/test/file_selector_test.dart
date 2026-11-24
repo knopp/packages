@@ -4,6 +4,7 @@
 
 import 'package:file_selector/file_selector.dart';
 import 'package:file_selector_platform_interface/file_selector_platform_interface.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
@@ -338,6 +339,33 @@ void main() {
       expect(directoryPaths, expectedDirectoryPaths);
     });
   });
+
+  group('context viewId forwarding', () {
+    testWidgets('passes viewId from BuildContext for all methods', (WidgetTester tester) async {
+      late BuildContext capturedContext;
+      await tester.pumpWidget(
+        Builder(
+          builder: (BuildContext context) {
+            capturedContext = context;
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      final int expectedViewId = tester.view.viewId;
+      final expectedFile = XFile('path');
+
+      fakePlatformImplementation
+        ..setExpectations(viewId: expectedViewId)
+        ..setFileResponse(<XFile>[expectedFile])
+        ..setPathsResponse(<String>['/example/path']);
+
+      expect(await openFile(context: capturedContext), expectedFile);
+      expect(await openFiles(context: capturedContext), <XFile>[expectedFile]);
+      expect((await getSaveLocation(context: capturedContext))?.path, '/example/path');
+      expect(await getDirectoryPath(context: capturedContext), '/example/path');
+      expect(await getDirectoryPaths(context: capturedContext), <String>['/example/path']);
+    });
+  });
 }
 
 class FakeFileSelector extends Fake
@@ -349,6 +377,7 @@ class FakeFileSelector extends Fake
   String? confirmButtonText;
   String? suggestedName;
   bool? canCreateDirectories;
+  int? viewId;
   // Return values.
   List<XFile>? files;
   List<String>? paths;
@@ -360,12 +389,14 @@ class FakeFileSelector extends Fake
     String? suggestedName,
     String? confirmButtonText,
     bool? canCreateDirectories,
+    int? viewId,
   }) {
     this.acceptedTypeGroups = acceptedTypeGroups;
     this.initialDirectory = initialDirectory;
     this.suggestedName = suggestedName;
     this.confirmButtonText = confirmButtonText;
     this.canCreateDirectories = canCreateDirectories;
+    this.viewId = viewId;
   }
 
   // ignore: use_setters_to_change_properties
@@ -386,7 +417,19 @@ class FakeFileSelector extends Fake
   }) async {
     expect(acceptedTypeGroups, this.acceptedTypeGroups);
     expect(initialDirectory, this.initialDirectory);
-    expect(suggestedName, suggestedName);
+    expect(confirmButtonText, this.confirmButtonText);
+    return files?[0];
+  }
+
+  @override
+  Future<XFile?> openFileWithOptions({
+    List<XTypeGroup>? acceptedTypeGroups,
+    FileDialogOptions options = const FileDialogOptions(),
+  }) async {
+    expect(acceptedTypeGroups, this.acceptedTypeGroups);
+    expect(options.initialDirectory, initialDirectory);
+    expect(options.confirmButtonText, confirmButtonText);
+    expect(options.viewId, viewId);
     return files?[0];
   }
 
@@ -398,7 +441,19 @@ class FakeFileSelector extends Fake
   }) async {
     expect(acceptedTypeGroups, this.acceptedTypeGroups);
     expect(initialDirectory, this.initialDirectory);
-    expect(suggestedName, suggestedName);
+    expect(confirmButtonText, this.confirmButtonText);
+    return files!;
+  }
+
+  @override
+  Future<List<XFile>> openFilesWithOptions({
+    List<XTypeGroup>? acceptedTypeGroups,
+    FileDialogOptions options = const FileDialogOptions(),
+  }) async {
+    expect(acceptedTypeGroups, this.acceptedTypeGroups);
+    expect(options.initialDirectory, initialDirectory);
+    expect(options.confirmButtonText, confirmButtonText);
+    expect(options.viewId, viewId);
     return files!;
   }
 
@@ -429,6 +484,7 @@ class FakeFileSelector extends Fake
     expect(options.initialDirectory, initialDirectory);
     expect(options.suggestedName, suggestedName);
     expect(options.confirmButtonText, confirmButtonText);
+    expect(options.viewId, viewId);
     final String? path = paths?[0];
     final int? activeFilterIndex = activeFilter;
     return path == null
@@ -456,6 +512,7 @@ class FakeFileSelector extends Fake
     expect(options.initialDirectory, initialDirectory);
     expect(options.confirmButtonText, confirmButtonText);
     expect(options.canCreateDirectories, canCreateDirectories);
+    expect(options.viewId, viewId);
     return paths?[0];
   }
 
@@ -476,6 +533,7 @@ class FakeFileSelector extends Fake
     expect(options.initialDirectory, initialDirectory);
     expect(options.confirmButtonText, confirmButtonText);
     expect(options.canCreateDirectories, canCreateDirectories);
+    expect(options.viewId, viewId);
     return paths!;
   }
 }

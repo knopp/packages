@@ -5,8 +5,22 @@
 #include <flutter_linux/flutter_linux.h>
 #include <gtk/gtk.h>
 
+#include <cstdint>
+
 #include "include/file_selector_linux/file_selector_plugin.h"
 #include "messages.g.h"
+
+// Resolves the FlView for the given optional |view_id|.
+//
+// When |view_id| is non-null and |get_view_by_id| is available, looks up the
+// view by ID and sets |error_response| to an invalid_view_id error if not
+// found. Otherwise falls back to |get_view|, setting |error_response| to a
+// No Screen error if null.
+FlView* resolve_view_for_id(
+    FlPluginRegistrar* registrar, const int64_t* view_id,
+    FlView* (*get_view)(FlPluginRegistrar*),
+    FlView* (*get_view_by_id)(FlPluginRegistrar*, int64_t),
+    FfsFileSelectorApiShowFileChooserResponse** error_response);
 
 // Creates a GtkFileChooserNative for the given method call.
 //

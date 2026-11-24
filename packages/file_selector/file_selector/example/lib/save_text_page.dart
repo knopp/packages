@@ -17,7 +17,7 @@ class SaveTextPage extends StatelessWidget {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
 
-  Future<void> _saveFile() async {
+  Future<void> _saveFile(BuildContext context) async {
     final String fileName = _nameController.text;
     // This demonstrates using an initial directory for the prompt, which should
     // only be done in cases where the application can likely predict where the
@@ -26,9 +26,13 @@ class SaveTextPage extends StatelessWidget {
     final String? initialDirectory = kIsWeb
         ? null
         : (await path_provider.getApplicationDocumentsDirectory()).path;
+    if (!context.mounted) {
+      return;
+    }
     final FileSaveLocation? result = await getSaveLocation(
       initialDirectory: initialDirectory,
       suggestedName: fileName,
+      context: context,
     );
     if (result == null) {
       // Operation was canceled by the user.
@@ -75,7 +79,7 @@ class SaveTextPage extends StatelessWidget {
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
               ),
-              onPressed: _isIOS ? null : () => _saveFile(),
+              onPressed: _isIOS ? null : () => _saveFile(context),
               child: const Text('Press to save a text file.'),
             ),
           ],

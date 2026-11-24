@@ -37,8 +37,6 @@ abstract class FileSelectorPlatform extends PlatformInterface {
   /// Opens a file dialog for loading files and returns a file path.
   ///
   /// Returns `null` if the user cancels the operation.
-  // TODO(stuartmorgan): Switch to FileDialogOptions if we ever need to
-  // duplicate this to add a parameter.
   Future<XFile?> openFile({
     List<XTypeGroup>? acceptedTypeGroups,
     String? initialDirectory,
@@ -47,17 +45,49 @@ abstract class FileSelectorPlatform extends PlatformInterface {
     throw UnimplementedError('openFile() has not been implemented.');
   }
 
+  /// Opens a file dialog for loading files and returns a file path.
+  ///
+  /// The `options` argument controls additional settings that can be passed to
+  /// the file dialog. See [FileDialogOptions] for more details.
+  ///
+  /// Returns `null` if the user cancels the operation.
+  Future<XFile?> openFileWithOptions({
+    List<XTypeGroup>? acceptedTypeGroups,
+    FileDialogOptions options = const FileDialogOptions(),
+  }) {
+    return openFile(
+      acceptedTypeGroups: acceptedTypeGroups,
+      initialDirectory: options.initialDirectory,
+      confirmButtonText: options.confirmButtonText,
+    );
+  }
+
   /// Opens a file dialog for loading files and returns a list of file paths.
   ///
   /// Returns an empty list if the user cancels the operation.
-  // TODO(stuartmorgan): Switch to FileDialogOptions if we ever need to
-  // duplicate this to add a parameter.
   Future<List<XFile>> openFiles({
     List<XTypeGroup>? acceptedTypeGroups,
     String? initialDirectory,
     String? confirmButtonText,
   }) {
     throw UnimplementedError('openFiles() has not been implemented.');
+  }
+
+  /// Opens a file dialog for loading files and returns a list of file paths.
+  ///
+  /// The `options` argument controls additional settings that can be passed to
+  /// the file dialog. See [FileDialogOptions] for more details.
+  ///
+  /// Returns an empty list if the user cancels the operation.
+  Future<List<XFile>> openFilesWithOptions({
+    List<XTypeGroup>? acceptedTypeGroups,
+    FileDialogOptions options = const FileDialogOptions(),
+  }) {
+    return openFiles(
+      acceptedTypeGroups: acceptedTypeGroups,
+      initialDirectory: options.initialDirectory,
+      confirmButtonText: options.confirmButtonText,
+    );
   }
 
   /// Opens a file dialog for saving files and returns a file path at which to

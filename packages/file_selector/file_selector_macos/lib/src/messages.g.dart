@@ -164,6 +164,7 @@ class SavePanelOptions {
     this.nameFieldStringValue,
     this.prompt,
     this.canCreateDirectories,
+    this.viewId,
   });
 
   AllowedTypes? allowedFileTypes;
@@ -176,6 +177,8 @@ class SavePanelOptions {
 
   bool? canCreateDirectories;
 
+  int? viewId;
+
   List<Object?> _toList() {
     return <Object?>[
       allowedFileTypes,
@@ -183,6 +186,7 @@ class SavePanelOptions {
       nameFieldStringValue,
       prompt,
       canCreateDirectories,
+      viewId,
     ];
   }
 
@@ -198,6 +202,7 @@ class SavePanelOptions {
       nameFieldStringValue: result[2] as String?,
       prompt: result[3] as String?,
       canCreateDirectories: result[4] as bool?,
+      viewId: result[5] as int?,
     );
   }
 
@@ -214,7 +219,8 @@ class SavePanelOptions {
         _deepEquals(directoryPath, other.directoryPath) &&
         _deepEquals(nameFieldStringValue, other.nameFieldStringValue) &&
         _deepEquals(prompt, other.prompt) &&
-        _deepEquals(canCreateDirectories, other.canCreateDirectories);
+        _deepEquals(canCreateDirectories, other.canCreateDirectories) &&
+        _deepEquals(viewId, other.viewId);
   }
 
   @override
@@ -223,7 +229,7 @@ class SavePanelOptions {
 
   @override
   String toString() {
-    return 'SavePanelOptions(allowedFileTypes: $allowedFileTypes, directoryPath: $directoryPath, nameFieldStringValue: $nameFieldStringValue, prompt: $prompt, canCreateDirectories: $canCreateDirectories)';
+    return 'SavePanelOptions(allowedFileTypes: $allowedFileTypes, directoryPath: $directoryPath, nameFieldStringValue: $nameFieldStringValue, prompt: $prompt, canCreateDirectories: $canCreateDirectories, viewId: $viewId)';
   }
 }
 

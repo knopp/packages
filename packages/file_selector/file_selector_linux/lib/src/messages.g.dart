@@ -167,6 +167,7 @@ class PlatformFileChooserOptions {
     this.acceptButtonLabel,
     this.selectMultiple,
     this.createFolders,
+    this.viewId,
   });
 
   List<PlatformTypeGroup>? allowedFileTypes;
@@ -187,6 +188,9 @@ class PlatformFileChooserOptions {
   /// Nullable because it does not apply to the "open" action.
   bool? createFolders;
 
+  /// The ID of the view to associate the dialog with, if any.
+  int? viewId;
+
   List<Object?> _toList() {
     return <Object?>[
       allowedFileTypes,
@@ -195,6 +199,7 @@ class PlatformFileChooserOptions {
       acceptButtonLabel,
       selectMultiple,
       createFolders,
+      viewId,
     ];
   }
 
@@ -211,6 +216,7 @@ class PlatformFileChooserOptions {
       acceptButtonLabel: result[3] as String?,
       selectMultiple: result[4] as bool?,
       createFolders: result[5] as bool?,
+      viewId: result[6] as int?,
     );
   }
 
@@ -228,7 +234,8 @@ class PlatformFileChooserOptions {
         _deepEquals(currentName, other.currentName) &&
         _deepEquals(acceptButtonLabel, other.acceptButtonLabel) &&
         _deepEquals(selectMultiple, other.selectMultiple) &&
-        _deepEquals(createFolders, other.createFolders);
+        _deepEquals(createFolders, other.createFolders) &&
+        _deepEquals(viewId, other.viewId);
   }
 
   @override
@@ -237,7 +244,7 @@ class PlatformFileChooserOptions {
 
   @override
   String toString() {
-    return 'PlatformFileChooserOptions(allowedFileTypes: $allowedFileTypes, currentFolderPath: $currentFolderPath, currentName: $currentName, acceptButtonLabel: $acceptButtonLabel, selectMultiple: $selectMultiple, createFolders: $createFolders)';
+    return 'PlatformFileChooserOptions(allowedFileTypes: $allowedFileTypes, currentFolderPath: $currentFolderPath, currentName: $currentName, acceptButtonLabel: $acceptButtonLabel, selectMultiple: $selectMultiple, createFolders: $createFolders, viewId: $viewId)';
   }
 }
 

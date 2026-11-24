@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file_selector_platform_interface/file_selector_platform_interface.dart';
+import 'package:flutter/widgets.dart' show BuildContext, View;
 
 export 'package:file_selector_platform_interface/file_selector_platform_interface.dart'
     show FileSaveLocation, XFile, XTypeGroup;
@@ -28,16 +29,23 @@ export 'package:file_selector_platform_interface/file_selector_platform_interfac
 /// When not provided, the default OS label is used (for example, "Open").
 /// This is ignored on the Web platform.
 ///
+/// [context] is the [BuildContext] of the window to present the dialog for on
+/// platforms that support multi-window dialogs.
+///
 /// Returns `null` if the user cancels the operation.
 Future<XFile?> openFile({
   List<XTypeGroup> acceptedTypeGroups = const <XTypeGroup>[],
   String? initialDirectory,
   String? confirmButtonText,
+  BuildContext? context,
 }) {
-  return FileSelectorPlatform.instance.openFile(
+  return FileSelectorPlatform.instance.openFileWithOptions(
     acceptedTypeGroups: acceptedTypeGroups,
-    initialDirectory: initialDirectory,
-    confirmButtonText: confirmButtonText,
+    options: FileDialogOptions(
+      initialDirectory: initialDirectory,
+      confirmButtonText: confirmButtonText,
+      viewId: context != null ? View.of(context).viewId : null,
+    ),
   );
 }
 
@@ -55,21 +63,29 @@ Future<XFile?> openFile({
 ///
 /// [initialDirectory] is the full path to the directory that will be displayed
 /// when the dialog is opened. When not provided, the platform will pick an
-/// initial location.
+/// initial location. This is ignored on the Web platform.
 ///
 /// [confirmButtonText] is the text in the confirmation button of the dialog.
 /// When not provided, the default OS label is used (for example, "Open").
+/// This is ignored on the Web platform.
+///
+/// [context] is the [BuildContext] of the window to present the dialog for on
+/// platforms that support multi-window dialogs.
 ///
 /// Returns an empty list if the user cancels the operation.
 Future<List<XFile>> openFiles({
   List<XTypeGroup> acceptedTypeGroups = const <XTypeGroup>[],
   String? initialDirectory,
   String? confirmButtonText,
+  BuildContext? context,
 }) {
-  return FileSelectorPlatform.instance.openFiles(
+  return FileSelectorPlatform.instance.openFilesWithOptions(
     acceptedTypeGroups: acceptedTypeGroups,
-    initialDirectory: initialDirectory,
-    confirmButtonText: confirmButtonText,
+    options: FileDialogOptions(
+      initialDirectory: initialDirectory,
+      confirmButtonText: confirmButtonText,
+      viewId: context != null ? View.of(context).viewId : null,
+    ),
   );
 }
 
@@ -97,6 +113,9 @@ Future<List<XFile>> openFiles({
 /// directories in the save dialog. When not provided, uses the platform default.
 /// May not be supported on all platforms.
 ///
+/// [context] is the [BuildContext] of the window to present the dialog for on
+/// platforms that support multi-window dialogs.
+///
 /// Returns `null` if the user cancels the operation.
 Future<FileSaveLocation?> getSaveLocation({
   List<XTypeGroup> acceptedTypeGroups = const <XTypeGroup>[],
@@ -104,6 +123,7 @@ Future<FileSaveLocation?> getSaveLocation({
   String? suggestedName,
   String? confirmButtonText,
   bool? canCreateDirectories,
+  BuildContext? context,
 }) async {
   return FileSelectorPlatform.instance.getSaveLocation(
     acceptedTypeGroups: acceptedTypeGroups,
@@ -112,6 +132,7 @@ Future<FileSaveLocation?> getSaveLocation({
       suggestedName: suggestedName,
       confirmButtonText: confirmButtonText,
       canCreateDirectories: canCreateDirectories,
+      viewId: context != null ? View.of(context).viewId : null,
     ),
   );
 }
@@ -131,17 +152,22 @@ Future<FileSaveLocation?> getSaveLocation({
 /// directories in the dialog. When not provided, uses the platform default.
 /// May not be supported on all platforms.
 ///
+/// [context] is the [BuildContext] of the window to present the dialog for on
+/// platforms that support multi-window dialogs.
+///
 /// Returns `null` if the user cancels the operation.
 Future<String?> getDirectoryPath({
   String? initialDirectory,
   String? confirmButtonText,
   bool? canCreateDirectories,
+  BuildContext? context,
 }) async {
   return FileSelectorPlatform.instance.getDirectoryPathWithOptions(
     FileDialogOptions(
       initialDirectory: initialDirectory,
       confirmButtonText: confirmButtonText,
       canCreateDirectories: canCreateDirectories,
+      viewId: context != null ? View.of(context).viewId : null,
     ),
   );
 }
@@ -162,17 +188,22 @@ Future<String?> getDirectoryPath({
 /// directories in the dialog. When not provided, uses the platform default.
 /// May not be supported on all platforms.
 ///
+/// [context] is the [BuildContext] of the window to present the dialog for on
+/// platforms that support multi-window dialogs.
+///
 /// Returns an empty array if the user cancels the operation.
 Future<List<String?>> getDirectoryPaths({
   String? initialDirectory,
   String? confirmButtonText,
   bool? canCreateDirectories,
+  BuildContext? context,
 }) async {
   return FileSelectorPlatform.instance.getDirectoryPathsWithOptions(
     FileDialogOptions(
       initialDirectory: initialDirectory,
       confirmButtonText: confirmButtonText,
       canCreateDirectories: canCreateDirectories,
+      viewId: context != null ? View.of(context).viewId : null,
     ),
   );
 }

@@ -24,9 +24,13 @@ class OpenTextPage extends StatelessWidget {
     final String? initialDirectory = kIsWeb
         ? null
         : (await getApplicationDocumentsDirectory()).path;
+    if (!context.mounted) {
+      return;
+    }
     final XFile? file = await openFile(
       acceptedTypeGroups: <XTypeGroup>[typeGroup],
       initialDirectory: initialDirectory,
+      context: context,
     );
     if (file == null) {
       // Operation was canceled by the user.

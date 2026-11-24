@@ -31,14 +31,30 @@ protocol PanelController {
     completionHandler: @escaping ([URL]?) -> Void)
 }
 
+/// Private protocol declaring the multi-view `FlutterPluginRegistrar` selector so it can be
+/// resolved dynamically without raising the minimum Flutter SDK constraint.
+@objc private protocol MultiViewPluginRegistrar {
+  @objc(viewForIdentifier:)
+  optional func multiView_view(forIdentifier viewIdentifier: Int64) -> NSView?
+}
+
+/// Result of looking up a view for a dialog.
+enum ViewLookupResult {
+  /// A view was found, or `nil` when using the legacy single-view fallback and no view exists.
+  case view(NSView?)
+  /// A specific `viewId` was requested on a multi-view registrar, but no matching view exists.
+  case notFound
+}
+
 /// Protocol to provide access to the Flutter view, allowing for dependency injection in tests.
 ///
 /// This is necessary because Swift doesn't allow for only partially implementing a protocol, so
 /// a stub implementation of FlutterPluginRegistrar for tests would break any time something was
 /// added to that protocol.
 protocol ViewProvider {
-  /// Returns the view associated with the Flutter content.
-  var view: NSView? { get }
+  /// Returns the view associated with the given `viewId`, or the default view if `viewId` is
+  /// `nil` or multi-view lookup is not supported by the registrar.
+  func view(forIdentifier viewId: Int64?) -> ViewLookupResult
 }
 
 public class FileSelectorPlugin: NSObject, FlutterPlugin, FileSelectorApi {
@@ -64,9 +80,22 @@ public class FileSelectorPlugin: NSObject, FlutterPlugin, FileSelectorApi {
   func displayOpenPanel(
     options: OpenPanelOptions, completion: @escaping (Result<[String], Error>) -> Void
   ) {
+    let view: NSView?
+    switch viewProvider.view(forIdentifier: options.baseOptions.viewId) {
+    case .view(let resolvedView):
+      view = resolvedView
+    case .notFound:
+      completion(
+        .failure(
+          PigeonError(
+            code: "invalid_view_id",
+            message: "No view found for viewId \(options.baseOptions.viewId!).",
+            details: nil)))
+      return
+    }
     let panel = NSOpenPanel()
     configure(openPanel: panel, with: options)
-    panelController.display(panel, for: viewProvider.view?.window) { (selection: [URL]?) in
+    panelController.display(panel, for: view?.window) { (selection: [URL]?) in
       completion(.success(selection?.map({ item in item.path }) ?? []))
     }
   }
@@ -74,9 +103,22 @@ public class FileSelectorPlugin: NSObject, FlutterPlugin, FileSelectorApi {
   func displaySavePanel(
     options: SavePanelOptions, completion: @escaping (Result<String?, Error>) -> Void
   ) {
+    let view: NSView?
+    switch viewProvider.view(forIdentifier: options.viewId) {
+    case .view(let resolvedView):
+      view = resolvedView
+    case .notFound:
+      completion(
+        .failure(
+          PigeonError(
+            code: "invalid_view_id",
+            message: "No view found for viewId \(options.viewId!).",
+            details: nil)))
+      return
+    }
     let panel = NSSavePanel()
     configure(panel: panel, with: options)
-    panelController.display(panel, for: viewProvider.view?.window) { (selection: URL?) in
+    panelController.display(panel, for: view?.window) { (selection: URL?) in
       completion(.success(selection?.path))
     }
   }
@@ -173,15 +215,31 @@ private class DefaultPanelController: PanelController {
   }
 }
 
-/// Non-test implementation of PanelController that forwards to the plugin registrar.
-private class DefaultViewProvider: ViewProvider {
-  private let registrar: FlutterPluginRegistrar
+/// Non-test implementation of ViewProvider that forwards to the plugin registrar.
+final class DefaultViewProvider: ViewProvider {
+  private let registrarObject: NSObjectProtocol
+  private let defaultViewProvider: () -> NSView?
 
-  init(registrar: FlutterPluginRegistrar) {
-    self.registrar = registrar
+  convenience init(registrar: FlutterPluginRegistrar) {
+    self.init(registrarObject: registrar, defaultViewProvider: { registrar.view })
   }
 
-  var view: NSView? {
-    registrar.view
+  init(registrarObject: NSObjectProtocol, defaultViewProvider: @escaping () -> NSView?) {
+    self.registrarObject = registrarObject
+    self.defaultViewProvider = defaultViewProvider
+  }
+
+  func view(forIdentifier viewId: Int64?) -> ViewLookupResult {
+    guard let viewId = viewId else {
+      return .view(defaultViewProvider())
+    }
+    let selector = #selector(MultiViewPluginRegistrar.multiView_view(forIdentifier:))
+    guard registrarObject.responds(to: selector) else {
+      return .view(defaultViewProvider())
+    }
+    guard let view = (registrarObject as AnyObject).multiView_view?(forIdentifier: viewId) else {
+      return .notFound
+    }
+    return .view(view)
   }
 }

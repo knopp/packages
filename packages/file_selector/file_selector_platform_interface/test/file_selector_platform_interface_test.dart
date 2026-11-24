@@ -74,13 +74,58 @@ void main() {
     expect(result?.path, OldFileSelectorPlatformImplementation.savePath);
     expect(result?.activeFilter, null);
   });
+
+  group('openFileWithOptions', () {
+    test('Should fall back to openFile by default', () async {
+      final FileSelectorPlatform fileSelector = OldFileSelectorPlatformImplementation();
+
+      final XFile? result = await fileSelector.openFileWithOptions(
+        options: const FileDialogOptions(viewId: 42),
+      );
+
+      expect(result?.path, OldFileSelectorPlatformImplementation.filePath);
+    });
+  });
+
+  group('openFilesWithOptions', () {
+    test('Should fall back to openFiles by default', () async {
+      final FileSelectorPlatform fileSelector = OldFileSelectorPlatformImplementation();
+
+      final List<XFile> result = await fileSelector.openFilesWithOptions(
+        options: const FileDialogOptions(viewId: 42),
+      );
+
+      expect(result.map((XFile file) => file.path), <String>[
+        OldFileSelectorPlatformImplementation.filePath,
+      ]);
+    });
+  });
 }
 
 class ExtendsFileSelectorPlatform extends FileSelectorPlatform {}
 
 class OldFileSelectorPlatformImplementation extends FileSelectorPlatform {
+  static const String filePath = '/a/file';
   static const String savePath = '/a/path';
   static const String directoryPath = '/a/directory';
+
+  @override
+  Future<XFile?> openFile({
+    List<XTypeGroup>? acceptedTypeGroups,
+    String? initialDirectory,
+    String? confirmButtonText,
+  }) async {
+    return XFile(filePath);
+  }
+
+  @override
+  Future<List<XFile>> openFiles({
+    List<XTypeGroup>? acceptedTypeGroups,
+    String? initialDirectory,
+    String? confirmButtonText,
+  }) async {
+    return <XFile>[XFile(filePath)];
+  }
 
   @override
   Future<String?> getSavePath({

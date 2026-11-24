@@ -27,6 +27,7 @@ class OpenMultipleImagesPage extends StatelessWidget {
     );
     final List<XFile> files = await openFiles(
       acceptedTypeGroups: <XTypeGroup>[jpgsTypeGroup, pngTypeGroup],
+      context: context,
     );
     // #enddocregion MultiOpen
     if (files.isEmpty) {

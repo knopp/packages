@@ -26,13 +26,28 @@ class FileSelectorLinux extends FileSelectorPlatform {
     String? initialDirectory,
     String? confirmButtonText,
   }) async {
+    return openFileWithOptions(
+      acceptedTypeGroups: acceptedTypeGroups,
+      options: FileDialogOptions(
+        initialDirectory: initialDirectory,
+        confirmButtonText: confirmButtonText,
+      ),
+    );
+  }
+
+  @override
+  Future<XFile?> openFileWithOptions({
+    List<XTypeGroup>? acceptedTypeGroups,
+    FileDialogOptions options = const FileDialogOptions(),
+  }) async {
     final List<String> paths = await _hostApi.showFileChooser(
       PlatformFileChooserActionType.open,
       PlatformFileChooserOptions(
         allowedFileTypes: _platformTypeGroupsFromXTypeGroups(acceptedTypeGroups),
-        currentFolderPath: initialDirectory,
-        acceptButtonLabel: confirmButtonText,
+        currentFolderPath: options.initialDirectory,
+        acceptButtonLabel: options.confirmButtonText,
         selectMultiple: false,
+        viewId: options.viewId,
       ),
     );
     return paths.isEmpty ? null : XFile(paths.first);
@@ -44,13 +59,28 @@ class FileSelectorLinux extends FileSelectorPlatform {
     String? initialDirectory,
     String? confirmButtonText,
   }) async {
+    return openFilesWithOptions(
+      acceptedTypeGroups: acceptedTypeGroups,
+      options: FileDialogOptions(
+        initialDirectory: initialDirectory,
+        confirmButtonText: confirmButtonText,
+      ),
+    );
+  }
+
+  @override
+  Future<List<XFile>> openFilesWithOptions({
+    List<XTypeGroup>? acceptedTypeGroups,
+    FileDialogOptions options = const FileDialogOptions(),
+  }) async {
     final List<String> paths = await _hostApi.showFileChooser(
       PlatformFileChooserActionType.open,
       PlatformFileChooserOptions(
         allowedFileTypes: _platformTypeGroupsFromXTypeGroups(acceptedTypeGroups),
-        currentFolderPath: initialDirectory,
-        acceptButtonLabel: confirmButtonText,
+        currentFolderPath: options.initialDirectory,
+        acceptButtonLabel: options.confirmButtonText,
         selectMultiple: true,
+        viewId: options.viewId,
       ),
     );
     return paths.map((String path) => XFile(path)).toList();
@@ -89,6 +119,7 @@ class FileSelectorLinux extends FileSelectorPlatform {
         currentName: options.suggestedName,
         acceptButtonLabel: options.confirmButtonText,
         createFolders: options.canCreateDirectories,
+        viewId: options.viewId,
       ),
     );
     return paths.isEmpty ? null : FileSaveLocation(paths.first);
@@ -110,6 +141,7 @@ class FileSelectorLinux extends FileSelectorPlatform {
         acceptButtonLabel: options.confirmButtonText,
         createFolders: options.canCreateDirectories,
         selectMultiple: false,
+        viewId: options.viewId,
       ),
     );
     return paths.isEmpty ? null : paths.first;
@@ -134,6 +166,7 @@ class FileSelectorLinux extends FileSelectorPlatform {
         acceptButtonLabel: options.confirmButtonText,
         createFolders: options.canCreateDirectories,
         selectMultiple: true,
+        viewId: options.viewId,
       ),
     );
   }

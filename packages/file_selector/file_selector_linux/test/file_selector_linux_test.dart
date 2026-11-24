@@ -423,6 +423,68 @@ void main() {
 
       expect(api.passedOptions?.selectMultiple, true);
     });
+
+    test('passes viewId correctly', () async {
+      await plugin.getDirectoryPathsWithOptions(const FileDialogOptions(viewId: 42));
+
+      expect(api.passedOptions?.viewId, 42);
+    });
+  });
+
+  group('openFileWithOptions', () {
+    test('passes viewId correctly', () async {
+      api.result = <String>['/foo/bar'];
+
+      final XFile? file = await plugin.openFileWithOptions(
+        options: const FileDialogOptions(
+          initialDirectory: '/example/directory',
+          confirmButtonText: 'Open File',
+          viewId: 7,
+        ),
+      );
+
+      expect(file?.path, '/foo/bar');
+      expect(api.passedType, PlatformFileChooserActionType.open);
+      expect(api.passedOptions?.selectMultiple, false);
+      expect(api.passedOptions?.currentFolderPath, '/example/directory');
+      expect(api.passedOptions?.acceptButtonLabel, 'Open File');
+      expect(api.passedOptions?.viewId, 7);
+    });
+  });
+
+  group('openFilesWithOptions', () {
+    test('passes viewId correctly', () async {
+      api.result = <String>['/foo/bar', '/foo/baz'];
+
+      final List<XFile> files = await plugin.openFilesWithOptions(
+        options: const FileDialogOptions(
+          initialDirectory: '/example/directory',
+          confirmButtonText: 'Open Files',
+          viewId: 9,
+        ),
+      );
+
+      expect(files.map((XFile file) => file.path), <String>['/foo/bar', '/foo/baz']);
+      expect(api.passedType, PlatformFileChooserActionType.open);
+      expect(api.passedOptions?.selectMultiple, true);
+      expect(api.passedOptions?.currentFolderPath, '/example/directory');
+      expect(api.passedOptions?.acceptButtonLabel, 'Open Files');
+      expect(api.passedOptions?.viewId, 9);
+    });
+  });
+
+  test('getSaveLocation passes viewId correctly', () async {
+    await plugin.getSaveLocation(options: const SaveDialogOptions(viewId: 12));
+
+    expect(api.passedType, PlatformFileChooserActionType.save);
+    expect(api.passedOptions?.viewId, 12);
+  });
+
+  test('getDirectoryPathWithOptions passes viewId correctly', () async {
+    await plugin.getDirectoryPathWithOptions(const FileDialogOptions(viewId: 15));
+
+    expect(api.passedType, PlatformFileChooserActionType.chooseDirectory);
+    expect(api.passedOptions?.viewId, 15);
   });
 }
 

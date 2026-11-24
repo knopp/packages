@@ -28,7 +28,7 @@ static const int platform_type_group_object_id = 130;
 TEST(FileSelectorPlugin, TestOpenSimple) {
   g_autoptr(FfsPlatformFileChooserOptions) options =
       ffs_platform_file_chooser_options_new(nullptr, nullptr, nullptr, nullptr,
-                                            nullptr, nullptr);
+                                            nullptr, nullptr, nullptr);
 
   g_autoptr(GtkFileChooserNative) dialog = create_dialog_of_type(
       nullptr, FILE_SELECTOR_LINUX_PLATFORM_FILE_CHOOSER_ACTION_TYPE_OPEN,
@@ -45,7 +45,7 @@ TEST(FileSelectorPlugin, TestOpenMultiple) {
   gboolean select_multiple = true;
   g_autoptr(FfsPlatformFileChooserOptions) options =
       ffs_platform_file_chooser_options_new(nullptr, nullptr, nullptr, nullptr,
-                                            &select_multiple, nullptr);
+                                            &select_multiple, nullptr, nullptr);
 
   g_autoptr(GtkFileChooserNative) dialog = create_dialog_of_type(
       nullptr, FILE_SELECTOR_LINUX_PLATFORM_FILE_CHOOSER_ACTION_TYPE_OPEN,
@@ -105,7 +105,7 @@ TEST(FileSelectorPlugin, TestOpenWithFilter) {
 
   g_autoptr(FfsPlatformFileChooserOptions) options =
       ffs_platform_file_chooser_options_new(type_groups, nullptr, nullptr,
-                                            nullptr, nullptr, nullptr);
+                                            nullptr, nullptr, nullptr, nullptr);
 
   g_autoptr(GtkFileChooserNative) dialog = create_dialog_of_type(
       nullptr, FILE_SELECTOR_LINUX_PLATFORM_FILE_CHOOSER_ACTION_TYPE_OPEN,
@@ -149,7 +149,7 @@ TEST(FileSelectorPlugin, TestOpenWithFilter) {
 TEST(FileSelectorPlugin, TestSaveSimple) {
   g_autoptr(FfsPlatformFileChooserOptions) options =
       ffs_platform_file_chooser_options_new(nullptr, nullptr, nullptr, nullptr,
-                                            nullptr, nullptr);
+                                            nullptr, nullptr, nullptr);
 
   g_autoptr(GtkFileChooserNative) dialog = create_dialog_of_type(
       nullptr, FILE_SELECTOR_LINUX_PLATFORM_FILE_CHOOSER_ACTION_TYPE_SAVE,
@@ -165,7 +165,7 @@ TEST(FileSelectorPlugin, TestSaveSimple) {
 TEST(FileSelectorPlugin, TestSaveWithArguments) {
   g_autoptr(FfsPlatformFileChooserOptions) options =
       ffs_platform_file_chooser_options_new(nullptr, "/tmp", "foo.txt", nullptr,
-                                            nullptr, nullptr);
+                                            nullptr, nullptr, nullptr);
 
   g_autoptr(GtkFileChooserNative) dialog = create_dialog_of_type(
       nullptr, FILE_SELECTOR_LINUX_PLATFORM_FILE_CHOOSER_ACTION_TYPE_SAVE,
@@ -188,7 +188,7 @@ TEST(FileSelectorPlugin, TestSaveWithCreateFoldersEnabled) {
   gboolean create_folders = true;
   g_autoptr(FfsPlatformFileChooserOptions) options =
       ffs_platform_file_chooser_options_new(nullptr, nullptr, nullptr, nullptr,
-                                            nullptr, &create_folders);
+                                            nullptr, &create_folders, nullptr);
 
   g_autoptr(GtkFileChooserNative) dialog = create_dialog_of_type(
       nullptr, FILE_SELECTOR_LINUX_PLATFORM_FILE_CHOOSER_ACTION_TYPE_SAVE,
@@ -207,7 +207,7 @@ TEST(FileSelectorPlugin, TestSaveWithCreateFoldersDisabled) {
   gboolean create_folders = false;
   g_autoptr(FfsPlatformFileChooserOptions) options =
       ffs_platform_file_chooser_options_new(nullptr, nullptr, nullptr, nullptr,
-                                            nullptr, &create_folders);
+                                            nullptr, &create_folders, nullptr);
 
   g_autoptr(GtkFileChooserNative) dialog = create_dialog_of_type(
       nullptr, FILE_SELECTOR_LINUX_PLATFORM_FILE_CHOOSER_ACTION_TYPE_SAVE,
@@ -225,7 +225,7 @@ TEST(FileSelectorPlugin, TestSaveWithCreateFoldersDisabled) {
 TEST(FileSelectorPlugin, TestGetDirectory) {
   g_autoptr(FfsPlatformFileChooserOptions) options =
       ffs_platform_file_chooser_options_new(nullptr, nullptr, nullptr, nullptr,
-                                            nullptr, nullptr);
+                                            nullptr, nullptr, nullptr);
 
   g_autoptr(GtkFileChooserNative) dialog = create_dialog_of_type(
       nullptr,
@@ -243,7 +243,7 @@ TEST(FileSelectorPlugin, TestGetMultipleDirectories) {
   gboolean select_multiple = true;
   g_autoptr(FfsPlatformFileChooserOptions) options =
       ffs_platform_file_chooser_options_new(nullptr, nullptr, nullptr, nullptr,
-                                            &select_multiple, nullptr);
+                                            &select_multiple, nullptr, nullptr);
 
   g_autoptr(GtkFileChooserNative) dialog = create_dialog_of_type(
       nullptr,
@@ -261,7 +261,7 @@ TEST(FileSelectorPlugin, TestGetDirectoryWithCreateFoldersEnabled) {
   gboolean create_folders = true;
   g_autoptr(FfsPlatformFileChooserOptions) options =
       ffs_platform_file_chooser_options_new(nullptr, nullptr, nullptr, nullptr,
-                                            nullptr, &create_folders);
+                                            nullptr, &create_folders, nullptr);
 
   g_autoptr(GtkFileChooserNative) dialog = create_dialog_of_type(
       nullptr,
@@ -279,7 +279,7 @@ TEST(FileSelectorPlugin, TestGetDirectoryWithCreateFoldersDisabled) {
   gboolean create_folders = false;
   g_autoptr(FfsPlatformFileChooserOptions) options =
       ffs_platform_file_chooser_options_new(nullptr, nullptr, nullptr, nullptr,
-                                            nullptr, &create_folders);
+                                            nullptr, &create_folders, nullptr);
 
   g_autoptr(GtkFileChooserNative) dialog = create_dialog_of_type(
       nullptr,
@@ -300,7 +300,7 @@ static gint mock_run_dialog_cancel(GtkNativeDialog* dialog) {
 TEST(FileSelectorPlugin, TestGetDirectoryCancel) {
   g_autoptr(FfsPlatformFileChooserOptions) options =
       ffs_platform_file_chooser_options_new(nullptr, nullptr, nullptr, nullptr,
-                                            nullptr, nullptr);
+                                            nullptr, nullptr, nullptr);
 
   g_autoptr(GtkFileChooserNative) dialog = create_dialog_of_type(
       nullptr,
@@ -313,4 +313,77 @@ TEST(FileSelectorPlugin, TestGetDirectoryCancel) {
       show_file_chooser(dialog, mock_run_dialog_cancel);
 
   EXPECT_NE(response, nullptr);
+}
+
+namespace {
+
+int kFakeDefaultViewStorage = 0;
+int kFakeSecondaryViewStorage = 0;
+
+FlView* mock_get_default_view(FlPluginRegistrar* registrar) {
+  return reinterpret_cast<FlView*>(&kFakeDefaultViewStorage);
+}
+
+FlView* mock_get_null_view(FlPluginRegistrar* registrar) { return nullptr; }
+
+FlView* mock_get_view_by_id(FlPluginRegistrar* registrar, int64_t view_id) {
+  if (view_id == 42) {
+    return reinterpret_cast<FlView*>(&kFakeSecondaryViewStorage);
+  }
+  return nullptr;
+}
+
+}  // namespace
+
+TEST(FileSelectorPlugin, TestResolveViewByIdSuccess) {
+  int64_t view_id = 42;
+  g_autoptr(FfsFileSelectorApiShowFileChooserResponse) error_response = nullptr;
+
+  FlView* view = resolve_view_for_id(nullptr, &view_id, mock_get_default_view,
+                                     mock_get_view_by_id, &error_response);
+
+  EXPECT_EQ(view, reinterpret_cast<FlView*>(&kFakeSecondaryViewStorage));
+  EXPECT_EQ(error_response, nullptr);
+}
+
+TEST(FileSelectorPlugin, TestResolveViewByIdNotFound) {
+  int64_t view_id = 999;
+  g_autoptr(FfsFileSelectorApiShowFileChooserResponse) error_response = nullptr;
+
+  FlView* view = resolve_view_for_id(nullptr, &view_id, mock_get_default_view,
+                                     mock_get_view_by_id, &error_response);
+
+  EXPECT_EQ(view, nullptr);
+  EXPECT_NE(error_response, nullptr);
+}
+
+TEST(FileSelectorPlugin, TestResolveViewByIdFallbackWhenUnavailable) {
+  int64_t view_id = 42;
+  g_autoptr(FfsFileSelectorApiShowFileChooserResponse) error_response = nullptr;
+
+  FlView* view = resolve_view_for_id(nullptr, &view_id, mock_get_default_view,
+                                     nullptr, &error_response);
+
+  EXPECT_EQ(view, reinterpret_cast<FlView*>(&kFakeDefaultViewStorage));
+  EXPECT_EQ(error_response, nullptr);
+}
+
+TEST(FileSelectorPlugin, TestResolveViewNilIdUsesDefaultView) {
+  g_autoptr(FfsFileSelectorApiShowFileChooserResponse) error_response = nullptr;
+
+  FlView* view = resolve_view_for_id(nullptr, nullptr, mock_get_default_view,
+                                     mock_get_view_by_id, &error_response);
+
+  EXPECT_EQ(view, reinterpret_cast<FlView*>(&kFakeDefaultViewStorage));
+  EXPECT_EQ(error_response, nullptr);
+}
+
+TEST(FileSelectorPlugin, TestResolveViewDefaultNullReturnsError) {
+  g_autoptr(FfsFileSelectorApiShowFileChooserResponse) error_response = nullptr;
+
+  FlView* view = resolve_view_for_id(nullptr, nullptr, mock_get_null_view,
+                                     mock_get_view_by_id, &error_response);
+
+  EXPECT_EQ(view, nullptr);
+  EXPECT_NE(error_response, nullptr);
 }

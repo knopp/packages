@@ -31,8 +31,7 @@ typedef enum {
  * A Pigeon representation of the Linux portion of an `XTypeGroup`.
  */
 
-G_DECLARE_FINAL_TYPE(FfsPlatformTypeGroup, ffs_platform_type_group, FFS,
-                     PLATFORM_TYPE_GROUP, GObject)
+G_DECLARE_FINAL_TYPE(FfsPlatformTypeGroup, ffs_platform_type_group, FFS, PLATFORM_TYPE_GROUP, GObject)
 
 /**
  * ffs_platform_type_group_new:
@@ -44,9 +43,7 @@ G_DECLARE_FINAL_TYPE(FfsPlatformTypeGroup, ffs_platform_type_group, FFS,
  *
  * Returns: a new #FfsPlatformTypeGroup
  */
-FfsPlatformTypeGroup* ffs_platform_type_group_new(const gchar* label,
-                                                  FlValue* extensions,
-                                                  FlValue* mime_types);
+FfsPlatformTypeGroup* ffs_platform_type_group_new(const gchar* label, FlValue* extensions, FlValue* mime_types);
 
 /**
  * ffs_platform_type_group_get_label
@@ -87,8 +84,7 @@ FlValue* ffs_platform_type_group_get_mime_types(FfsPlatformTypeGroup* object);
  *
  * Returns: TRUE if @a and @b are equal.
  */
-gboolean ffs_platform_type_group_equals(FfsPlatformTypeGroup* a,
-                                        FfsPlatformTypeGroup* b);
+gboolean ffs_platform_type_group_equals(FfsPlatformTypeGroup* a, FfsPlatformTypeGroup* b);
 
 /**
  * ffs_platform_type_group_hash:
@@ -118,9 +114,7 @@ gchar* ffs_platform_type_group_to_string(FfsPlatformTypeGroup* object);
  * These correspond to gtk_file_chooser_set_* options.
  */
 
-G_DECLARE_FINAL_TYPE(FfsPlatformFileChooserOptions,
-                     ffs_platform_file_chooser_options, FFS,
-                     PLATFORM_FILE_CHOOSER_OPTIONS, GObject)
+G_DECLARE_FINAL_TYPE(FfsPlatformFileChooserOptions, ffs_platform_file_chooser_options, FFS, PLATFORM_FILE_CHOOSER_OPTIONS, GObject)
 
 /**
  * ffs_platform_file_chooser_options_new:
@@ -130,15 +124,13 @@ G_DECLARE_FINAL_TYPE(FfsPlatformFileChooserOptions,
  * accept_button_label: field in this object.
  * select_multiple: field in this object.
  * create_folders: field in this object.
+ * view_id: field in this object.
  *
  * Creates a new #PlatformFileChooserOptions object.
  *
  * Returns: a new #FfsPlatformFileChooserOptions
  */
-FfsPlatformFileChooserOptions* ffs_platform_file_chooser_options_new(
-    FlValue* allowed_file_types, const gchar* current_folder_path,
-    const gchar* current_name, const gchar* accept_button_label,
-    gboolean* select_multiple, gboolean* create_folders);
+FfsPlatformFileChooserOptions* ffs_platform_file_chooser_options_new(FlValue* allowed_file_types, const gchar* current_folder_path, const gchar* current_name, const gchar* accept_button_label, gboolean* select_multiple, gboolean* create_folders, int64_t* view_id);
 
 /**
  * ffs_platform_file_chooser_options_get_allowed_file_types
@@ -148,8 +140,7 @@ FfsPlatformFileChooserOptions* ffs_platform_file_chooser_options_new(
  *
  * Returns: the field value.
  */
-FlValue* ffs_platform_file_chooser_options_get_allowed_file_types(
-    FfsPlatformFileChooserOptions* object);
+FlValue* ffs_platform_file_chooser_options_get_allowed_file_types(FfsPlatformFileChooserOptions* object);
 
 /**
  * ffs_platform_file_chooser_options_get_current_folder_path
@@ -159,8 +150,7 @@ FlValue* ffs_platform_file_chooser_options_get_allowed_file_types(
  *
  * Returns: the field value.
  */
-const gchar* ffs_platform_file_chooser_options_get_current_folder_path(
-    FfsPlatformFileChooserOptions* object);
+const gchar* ffs_platform_file_chooser_options_get_current_folder_path(FfsPlatformFileChooserOptions* object);
 
 /**
  * ffs_platform_file_chooser_options_get_current_name
@@ -170,8 +160,7 @@ const gchar* ffs_platform_file_chooser_options_get_current_folder_path(
  *
  * Returns: the field value.
  */
-const gchar* ffs_platform_file_chooser_options_get_current_name(
-    FfsPlatformFileChooserOptions* object);
+const gchar* ffs_platform_file_chooser_options_get_current_name(FfsPlatformFileChooserOptions* object);
 
 /**
  * ffs_platform_file_chooser_options_get_accept_button_label
@@ -181,8 +170,7 @@ const gchar* ffs_platform_file_chooser_options_get_current_name(
  *
  * Returns: the field value.
  */
-const gchar* ffs_platform_file_chooser_options_get_accept_button_label(
-    FfsPlatformFileChooserOptions* object);
+const gchar* ffs_platform_file_chooser_options_get_accept_button_label(FfsPlatformFileChooserOptions* object);
 
 /**
  * ffs_platform_file_chooser_options_get_select_multiple
@@ -194,8 +182,7 @@ const gchar* ffs_platform_file_chooser_options_get_accept_button_label(
  *
  * Returns: the field value.
  */
-gboolean* ffs_platform_file_chooser_options_get_select_multiple(
-    FfsPlatformFileChooserOptions* object);
+gboolean* ffs_platform_file_chooser_options_get_select_multiple(FfsPlatformFileChooserOptions* object);
 
 /**
  * ffs_platform_file_chooser_options_get_create_folders
@@ -207,8 +194,17 @@ gboolean* ffs_platform_file_chooser_options_get_select_multiple(
  *
  * Returns: the field value.
  */
-gboolean* ffs_platform_file_chooser_options_get_create_folders(
-    FfsPlatformFileChooserOptions* object);
+gboolean* ffs_platform_file_chooser_options_get_create_folders(FfsPlatformFileChooserOptions* object);
+
+/**
+ * ffs_platform_file_chooser_options_get_view_id
+ * @object: a #FfsPlatformFileChooserOptions.
+ *
+ * The ID of the view to associate the dialog with, if any.
+ *
+ * Returns: the field value.
+ */
+int64_t* ffs_platform_file_chooser_options_get_view_id(FfsPlatformFileChooserOptions* object);
 
 /**
  * ffs_platform_file_chooser_options_equals:
@@ -219,8 +215,7 @@ gboolean* ffs_platform_file_chooser_options_get_create_folders(
  *
  * Returns: TRUE if @a and @b are equal.
  */
-gboolean ffs_platform_file_chooser_options_equals(
-    FfsPlatformFileChooserOptions* a, FfsPlatformFileChooserOptions* b);
+gboolean ffs_platform_file_chooser_options_equals(FfsPlatformFileChooserOptions* a, FfsPlatformFileChooserOptions* b);
 
 /**
  * ffs_platform_file_chooser_options_hash:
@@ -230,8 +225,7 @@ gboolean ffs_platform_file_chooser_options_equals(
  *
  * Returns: the hash code.
  */
-guint ffs_platform_file_chooser_options_hash(
-    FfsPlatformFileChooserOptions* object);
+guint ffs_platform_file_chooser_options_hash(FfsPlatformFileChooserOptions* object);
 
 /**
  * ffs_platform_file_chooser_options_to_string:
@@ -241,11 +235,9 @@ guint ffs_platform_file_chooser_options_hash(
  *
  * Returns: (transfer full): a new string, free with g_free().
  */
-gchar* ffs_platform_file_chooser_options_to_string(
-    FfsPlatformFileChooserOptions* object);
+gchar* ffs_platform_file_chooser_options_to_string(FfsPlatformFileChooserOptions* object);
 
-G_DECLARE_FINAL_TYPE(FfsMessageCodec, ffs_message_codec, FFS, MESSAGE_CODEC,
-                     FlStandardMessageCodec)
+G_DECLARE_FINAL_TYPE(FfsMessageCodec, ffs_message_codec, FFS, MESSAGE_CODEC, FlStandardMessageCodec)
 
 /**
  * Custom type ID constants:
@@ -258,12 +250,9 @@ extern const int ffs_platform_file_chooser_action_type_type_id;
 extern const int ffs_platform_type_group_type_id;
 extern const int ffs_platform_file_chooser_options_type_id;
 
-G_DECLARE_FINAL_TYPE(FfsFileSelectorApi, ffs_file_selector_api, FFS,
-                     FILE_SELECTOR_API, GObject)
+G_DECLARE_FINAL_TYPE(FfsFileSelectorApi, ffs_file_selector_api, FFS, FILE_SELECTOR_API, GObject)
 
-G_DECLARE_FINAL_TYPE(FfsFileSelectorApiShowFileChooserResponse,
-                     ffs_file_selector_api_show_file_chooser_response, FFS,
-                     FILE_SELECTOR_API_SHOW_FILE_CHOOSER_RESPONSE, GObject)
+G_DECLARE_FINAL_TYPE(FfsFileSelectorApiShowFileChooserResponse, ffs_file_selector_api_show_file_chooser_response, FFS, FILE_SELECTOR_API_SHOW_FILE_CHOOSER_RESPONSE, GObject)
 
 /**
  * ffs_file_selector_api_show_file_chooser_response_new:
@@ -272,8 +261,7 @@ G_DECLARE_FINAL_TYPE(FfsFileSelectorApiShowFileChooserResponse,
  *
  * Returns: a new #FfsFileSelectorApiShowFileChooserResponse
  */
-FfsFileSelectorApiShowFileChooserResponse*
-ffs_file_selector_api_show_file_chooser_response_new(FlValue* return_value);
+FfsFileSelectorApiShowFileChooserResponse* ffs_file_selector_api_show_file_chooser_response_new(FlValue* return_value);
 
 /**
  * ffs_file_selector_api_show_file_chooser_response_new_error:
@@ -285,21 +273,15 @@ ffs_file_selector_api_show_file_chooser_response_new(FlValue* return_value);
  *
  * Returns: a new #FfsFileSelectorApiShowFileChooserResponse
  */
-FfsFileSelectorApiShowFileChooserResponse*
-ffs_file_selector_api_show_file_chooser_response_new_error(const gchar* code,
-                                                           const gchar* message,
-                                                           FlValue* details);
+FfsFileSelectorApiShowFileChooserResponse* ffs_file_selector_api_show_file_chooser_response_new_error(const gchar* code, const gchar* message, FlValue* details);
 
 /**
  * FfsFileSelectorApiVTable:
  *
- * Table of functions exposed by FileSelectorApi to be implemented by the API
- * provider.
+ * Table of functions exposed by FileSelectorApi to be implemented by the API provider.
  */
 typedef struct {
-  FfsFileSelectorApiShowFileChooserResponse* (*show_file_chooser)(
-      FfsPlatformFileChooserActionType type,
-      FfsPlatformFileChooserOptions* options, gpointer user_data);
+  FfsFileSelectorApiShowFileChooserResponse* (*show_file_chooser)(FfsPlatformFileChooserActionType type, FfsPlatformFileChooserOptions* options, gpointer user_data);
 } FfsFileSelectorApiVTable;
 
 /**
@@ -309,15 +291,11 @@ typedef struct {
  * @suffix: (allow-none): a suffix to add to the API or %NULL for none.
  * @vtable: implementations of the methods in this API.
  * @user_data: (closure): user data to pass to the functions in @vtable.
- * @user_data_free_func: (allow-none): a function which gets called to free
- * @user_data, or %NULL.
+ * @user_data_free_func: (allow-none): a function which gets called to free @user_data, or %NULL.
  *
  * Connects the method handlers in the FileSelectorApi API.
  */
-void ffs_file_selector_api_set_method_handlers(
-    FlBinaryMessenger* messenger, const gchar* suffix,
-    const FfsFileSelectorApiVTable* vtable, gpointer user_data,
-    GDestroyNotify user_data_free_func);
+void ffs_file_selector_api_set_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix, const FfsFileSelectorApiVTable* vtable, gpointer user_data, GDestroyNotify user_data_free_func);
 
 /**
  * ffs_file_selector_api_clear_method_handlers:
@@ -327,8 +305,7 @@ void ffs_file_selector_api_set_method_handlers(
  *
  * Clears the method handlers in the FileSelectorApi API.
  */
-void ffs_file_selector_api_clear_method_handlers(FlBinaryMessenger* messenger,
-                                                 const gchar* suffix);
+void ffs_file_selector_api_clear_method_handlers(FlBinaryMessenger* messenger, const gchar* suffix);
 
 G_END_DECLS
 

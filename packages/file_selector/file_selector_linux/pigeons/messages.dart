@@ -40,6 +40,7 @@ class PlatformFileChooserOptions {
     required this.acceptButtonLabel,
     this.selectMultiple,
     this.createFolders,
+    this.viewId,
   });
 
   final List<PlatformTypeGroup>? allowedFileTypes;
@@ -56,6 +57,9 @@ class PlatformFileChooserOptions {
   ///
   /// Nullable because it does not apply to the "open" action.
   final bool? createFolders;
+
+  /// The ID of the view to associate the dialog with, if any.
+  final int? viewId;
 }
 
 @HostApi()

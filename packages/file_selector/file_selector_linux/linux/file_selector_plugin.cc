@@ -4,8 +4,12 @@
 
 #include "include/file_selector_linux/file_selector_plugin.h"
 
+#include <dlfcn.h>
 #include <flutter_linux/flutter_linux.h>
 #include <gtk/gtk.h>
+
+#include <cinttypes>
+#include <cstdint>
 
 #include "file_selector_plugin_private.h"
 #include "messages.g.h"
@@ -13,6 +17,17 @@
 // Error codes.
 const char kBadArgumentsError[] = "Bad Arguments";
 const char kNoScreenError[] = "No Screen";
+const char kInvalidViewIdError[] = "invalid_view_id";
+
+using FlPluginRegistrarGetViewByIdFunc = FlView* (*)(FlPluginRegistrar*,
+                                                     int64_t);
+
+// Dynamically resolves fl_plugin_registrar_get_view_by_id so the plugin builds
+// and runs on Flutter versions that predate multi-view support.
+static FlPluginRegistrarGetViewByIdFunc resolve_get_view_by_id() {
+  return reinterpret_cast<FlPluginRegistrarGetViewByIdFunc>(
+      dlsym(RTLD_DEFAULT, "fl_plugin_registrar_get_view_by_id"));
+}
 
 struct _FlFileSelectorPlugin {
   GObject parent_instance;
@@ -121,16 +136,48 @@ GtkFileChooserNative* create_dialog_of_type(
   return nullptr;
 }
 
+FlView* resolve_view_for_id(
+    FlPluginRegistrar* registrar, const int64_t* view_id,
+    FlView* (*get_view)(FlPluginRegistrar*),
+    FlView* (*get_view_by_id)(FlPluginRegistrar*, int64_t),
+    FfsFileSelectorApiShowFileChooserResponse** error_response) {
+  if (view_id != nullptr && get_view_by_id != nullptr) {
+    FlView* view = get_view_by_id(registrar, *view_id);
+    if (view == nullptr) {
+      g_autofree gchar* message =
+          g_strdup_printf("No view found for viewId %" PRId64 ".", *view_id);
+      *error_response =
+          ffs_file_selector_api_show_file_chooser_response_new_error(
+              kInvalidViewIdError, message, nullptr);
+      return nullptr;
+    }
+    return view;
+  }
+
+  FlView* view = get_view(registrar);
+  if (view == nullptr) {
+    *error_response =
+        ffs_file_selector_api_show_file_chooser_response_new_error(
+            kNoScreenError, nullptr, nullptr);
+    return nullptr;
+  }
+  return view;
+}
+
 // Shows the requested dialog type.
 static FfsFileSelectorApiShowFileChooserResponse* handle_show_file_chooser(
     FfsPlatformFileChooserActionType type,
     FfsPlatformFileChooserOptions* options, gpointer user_data) {
   FlFileSelectorPlugin* self = FL_FILE_SELECTOR_PLUGIN(user_data);
 
-  FlView* view = fl_plugin_registrar_get_view(self->registrar);
-  if (view == nullptr) {
-    return ffs_file_selector_api_show_file_chooser_response_new_error(
-        kNoScreenError, nullptr, nullptr);
+  const int64_t* view_id =
+      ffs_platform_file_chooser_options_get_view_id(options);
+  FfsFileSelectorApiShowFileChooserResponse* error_response = nullptr;
+  FlView* view = resolve_view_for_id(self->registrar, view_id,
+                                     fl_plugin_registrar_get_view,
+                                     resolve_get_view_by_id(), &error_response);
+  if (error_response != nullptr) {
+    return error_response;
   }
   GtkWindow* window = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(view)));
 

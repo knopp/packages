@@ -12,6 +12,7 @@ class TestPanelController: NSObject, PanelController {
   // The last panels that the relevant display methods were called on.
   public var savePanel: NSSavePanel?
   public var openPanel: NSOpenPanel?
+  public var lastWindow: NSWindow?
 
   // Mock return values for the display methods.
   public var saveURL: URL?
@@ -21,6 +22,7 @@ class TestPanelController: NSObject, PanelController {
     _ panel: NSSavePanel, for window: NSWindow?, completionHandler handler: @escaping (URL?) -> Void
   ) {
     savePanel = panel
+    lastWindow = window
     handler(saveURL)
   }
 
@@ -29,15 +31,35 @@ class TestPanelController: NSObject, PanelController {
     completionHandler handler: @escaping ([URL]?) -> Void
   ) {
     openPanel = panel
+    lastWindow = window
     handler(openURLs)
   }
 }
 
 class TestViewProvider: NSObject, ViewProvider {
-  var view: NSView? {
-    window?.contentView
-  }
   var window: NSWindow? = NSWindow()
+  var windowsByViewId: [Int64: NSWindow] = [:]
+
+  func view(forIdentifier viewId: Int64?) -> ViewLookupResult {
+    guard let viewId = viewId else {
+      return .view(window?.contentView)
+    }
+    guard let targetWindow = windowsByViewId[viewId] else {
+      return .notFound
+    }
+    return .view(targetWindow.contentView)
+  }
+}
+
+private class LegacyRegistrarStub: NSObject {}
+
+private class MultiViewRegistrarStub: NSObject {
+  var viewsById: [Int64: NSView] = [:]
+
+  @objc(viewForIdentifier:)
+  func view(forIdentifier viewIdentifier: Int64) -> NSView? {
+    return viewsById[viewIdentifier]
+  }
 }
 
 @Suite @MainActor struct ExampleTests {
@@ -501,5 +523,160 @@ class TestViewProvider: NSObject, ViewProvider {
 
     let panel = try #require(panelController.openPanel)
     #expect(panel.canCreateDirectories)
+  }
+
+  @Test func openWithViewId() async throws {
+    let panelController = TestPanelController()
+    let viewProvider = TestViewProvider()
+    let targetWindow = NSWindow()
+    viewProvider.windowsByViewId[42] = targetWindow
+    let plugin = FileSelectorPlugin(
+      viewProvider: viewProvider,
+      panelController: panelController)
+
+    let returnPath = "/foo/bar"
+    panelController.openURLs = [URL(fileURLWithPath: returnPath)]
+
+    await confirmation("completion") { called in
+      let options = OpenPanelOptions(
+        allowsMultipleSelection: false,
+        canChooseDirectories: false,
+        canChooseFiles: true,
+        baseOptions: SavePanelOptions(viewId: 42))
+      plugin.displayOpenPanel(options: options) { result in
+        switch result {
+        case .success(let paths):
+          #expect(paths == [returnPath])
+        case .failure(let error):
+          Issue.record("\(error)")
+        }
+        called()
+      }
+    }
+
+    #expect(panelController.lastWindow === targetWindow)
+  }
+
+  @Test func openWithInvalidViewId() async throws {
+    let panelController = TestPanelController()
+    let plugin = FileSelectorPlugin(
+      viewProvider: TestViewProvider(),
+      panelController: panelController)
+
+    await confirmation("completion") { called in
+      let options = OpenPanelOptions(
+        allowsMultipleSelection: false,
+        canChooseDirectories: false,
+        canChooseFiles: true,
+        baseOptions: SavePanelOptions(viewId: 999))
+      plugin.displayOpenPanel(options: options) { result in
+        switch result {
+        case .success:
+          Issue.record("Expected error for invalid viewId")
+        case .failure(let error):
+          let pigeonError = error as? PigeonError
+          #expect(pigeonError?.code == "invalid_view_id")
+        }
+        called()
+      }
+    }
+
+    #expect(panelController.openPanel == nil)
+  }
+
+  @Test func saveWithViewId() async throws {
+    let panelController = TestPanelController()
+    let viewProvider = TestViewProvider()
+    let targetWindow = NSWindow()
+    viewProvider.windowsByViewId[42] = targetWindow
+    let plugin = FileSelectorPlugin(
+      viewProvider: viewProvider,
+      panelController: panelController)
+
+    let returnPath = "/foo/bar"
+    panelController.saveURL = URL(fileURLWithPath: returnPath)
+
+    await confirmation("completion") { called in
+      let options = SavePanelOptions(viewId: 42)
+      plugin.displaySavePanel(options: options) { result in
+        switch result {
+        case .success(let path):
+          #expect(path == returnPath)
+        case .failure(let error):
+          Issue.record("\(error)")
+        }
+        called()
+      }
+    }
+
+    #expect(panelController.lastWindow === targetWindow)
+  }
+
+  @Test func saveWithInvalidViewId() async throws {
+    let panelController = TestPanelController()
+    let plugin = FileSelectorPlugin(
+      viewProvider: TestViewProvider(),
+      panelController: panelController)
+
+    await confirmation("completion") { called in
+      let options = SavePanelOptions(viewId: 999)
+      plugin.displaySavePanel(options: options) { result in
+        switch result {
+        case .success:
+          Issue.record("Expected error for invalid viewId")
+        case .failure(let error):
+          let pigeonError = error as? PigeonError
+          #expect(pigeonError?.code == "invalid_view_id")
+        }
+        called()
+      }
+    }
+
+    #expect(panelController.savePanel == nil)
+  }
+
+  @Test func defaultViewProviderFallsBackWhenMultiViewSelectorMissing() {
+    let defaultView = NSView()
+    let provider = DefaultViewProvider(
+      registrarObject: LegacyRegistrarStub(),
+      defaultViewProvider: { defaultView })
+
+    switch provider.view(forIdentifier: 42) {
+    case .view(let resolved):
+      #expect(resolved === defaultView)
+    case .notFound:
+      Issue.record("Expected fallback to default view when selector is unavailable")
+    }
+  }
+
+  @Test func defaultViewProviderResolvesMultiViewSelector() {
+    let defaultView = NSView()
+    let secondaryView = NSView()
+    let registrar = MultiViewRegistrarStub()
+    registrar.viewsById[42] = secondaryView
+    let provider = DefaultViewProvider(
+      registrarObject: registrar,
+      defaultViewProvider: { defaultView })
+
+    switch provider.view(forIdentifier: nil) {
+    case .view(let resolved):
+      #expect(resolved === defaultView)
+    case .notFound:
+      Issue.record("Expected default view when viewId is nil")
+    }
+
+    switch provider.view(forIdentifier: 42) {
+    case .view(let resolved):
+      #expect(resolved === secondaryView)
+    case .notFound:
+      Issue.record("Expected secondary view for viewId 42")
+    }
+
+    switch provider.view(forIdentifier: 99) {
+    case .view:
+      Issue.record("Expected .notFound for unknown viewId 99")
+    case .notFound:
+      break
+    }
   }
 }

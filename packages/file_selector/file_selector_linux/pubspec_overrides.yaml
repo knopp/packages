@@ -1,0 +1,3 @@
+dependency_overrides:
+  file_selector_platform_interface:
+    path: ../file_selector_platform_interface
